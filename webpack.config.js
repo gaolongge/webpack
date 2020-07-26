@@ -4,8 +4,16 @@
 /*
  webpack内部默认只能够处理 JS 模块代码，当遇到其他类型的模块式时，需要对应的loade去处理
 */
+const path = require('path');
 
-const path = require('path')
+// 清除目录插件
+const { CleanWebpackPlugin } = require('clean-webpack-plugin');
+// 自动生成html
+const HtmlWebpackPlugin = require('html-webpack-plugin');
+// 拷贝文件和文件夹
+const CopyWebpackPlugin = require('copy-webpack-plugin');
+// 删除打包的js文件的开头注释的自定义插件
+const RemoveCommentsPlugin = require('./remove-comments-plugin');
 
 /*
 * @type {Configuration}
@@ -51,7 +59,34 @@ const config = {
 			// 	]
 			// }
 		]
-	}
+	},
+	plugins: [
+		new CleanWebpackPlugin(),
+		// 输出多个 HTML 文件：就多个 new HtmlWebpackPlugin的实例 
+		new HtmlWebpackPlugin({
+		  title: 'Webpack Plugin(HtmlWebpackPlugin) Sample', // 生成html文件的标题
+		  meta: {
+			viewport: 'width=device-width'
+		  },
+		  template: './src/index.html'  // 模板
+		}),
+		// 用于生成 about.html
+		new HtmlWebpackPlugin({
+		  filename: 'about.html', // 输出的html的文件名称
+		  minify: {}, // minify 的作用是对 html 文件进行压缩，minify 的属性值是一个压缩选项或者 false 。默认值为false, 不对生成的 html 文件进行压缩。
+		  hash: true, // hash选项的作用是 给生成的 js 文件一个独特的 hash 值
+		  
+		}),
+		// 拷贝文件和文件夹
+		new CopyWebpackPlugin({
+		  patterns: [
+			//  from: 从哪个文件夹开始复制， to: 复制到要打包的文件下的名字
+			{ from: './public', to: 'public' },
+		  ],
+		}),
+		new RemoveCommentsPlugin()
+		
+	]
 
 }
 module.exports = config
